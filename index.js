@@ -27,8 +27,8 @@ cron.schedule('*/10 * * * *', function() {
     request('https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=btc_krw',
         function(error, response, body) {
             var jsonObj = JSON.parse(body);
-            console.log('last:',jsonObj['last']);
             var buy = startValue + range*0.5;
+            console.log('last:',jsonObj['last']+",buy:"+buy);
             var last = jsonObj['last']
             if (buy < last) {
                sampleStr = 'Buy Now!!-' + last; 
