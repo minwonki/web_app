@@ -28,7 +28,6 @@ cron.schedule('*/10 * * * *', function() {
         function(error, response, body) {
             var jsonObj = JSON.parse(body);
             var buy = startValue + range*0.5;
-            console.log('last:',jsonObj['last']+",buy:"+buy);
             var last = jsonObj['last']
             if (buy < last) {
                sampleStr = 'Buy Now!!-' + last; 
@@ -36,6 +35,7 @@ cron.schedule('*/10 * * * *', function() {
                flagStop = true;
             } else {
                sampleStr = 'Not yet - ' + buy + ':' + last;
+               console.log('Not yet - last:',jsonObj['last']+",buy:"+buy);
             }
     });
   }
