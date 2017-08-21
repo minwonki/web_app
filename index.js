@@ -3,42 +3,54 @@ var app = express();
 var cron = require('node-cron');
 var request = require('request');
 
-var sampleStr = 'nothing';
-var startValue = 4850250;
-var range = 200000;
-var flagStop = false;
+var btcStr = 'btc_nothing';
+var ethStr = 'eth_nothing';
+var startValue = 4750000;
+var range = 272500;
 
-cron.schedule('*/2 * * * *', function() {
-    request('https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=btc_krw',
-    function(error, response, body) {
-        var jsonObj = JSON.parse(body);
-        var timestamp = new Date(jsonObj['timestamp']);
-        if (timestamp.getHours() == 1) {
-            console.log('time:',timestamp.getHours());
-            startValue = jsonObj['last'];
-            range = jsonObj['high'] - jsonObj['low'];
-            console.log('start:', startValue);
-            console.log('range:', range);
-            console.log('time:', timestamp.toString());
-            sampleStr = 'Setting StartValue:' + startValue + ', range:' + range + ', time:' + timestamp.toString();
-        } else {
-            var buy = startValue + range*0.5;
-            var last = jsonObj['last']
-            if (buy < last) {
-               sampleStr = 'Buy Now!! - last:' + last + ',buy:' + buy + ' - ' +timestamp.toString(); 
-               console.log('Buy Now!! - last:' + last + ',buy:' + buy + ' - ' +timestamp.toString());
-            } else {
-               sampleStr = 'Not yet - last:' + last + ',buy:' + buy + ' - ' +timestamp.toString();
-               console.log('Not yet - last:' + last + ',buy:' + buy + ' - ' +timestamp.toString());
-            }
-        }
-    });
+function Req (type) {
+  this.url = 'https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=' + type;
+  this.startValue = 4750000;
+  this.range = 272500;
+  this.sampleStr = 'nothing';
+  
+  request(this.url,
+  function(error, response, body) {
+      var jsonObj = JSON.parse(body);
+      var timestamp = new Date(jsonObj['timestamp']);
+      if (timestamp.getHours() == 1) {
+          startValue = jsonObj['last'];
+          range = jsonObj['high'] - jsonObj['low'];
+      } else {
+          var buy = Number(startValue) + range*0.5;
+          var last = jsonObj['last']
+          sampleStr = timestamp.toString();
+          sampleStr = sampleStr + '</br>start:' + startValue + ', range:' + range + ", last:" + last; 
+          if (buy < last) {
+             sampleStr = sampleStr + '</br>Buy Now!!! - buy:' + buy; 
+          } else {
+             sampleStr = sampleStr + '</br>Not yet!!! - buy:' + buy;
+          }
+          if (type == 'btc_krw') {
+            btcStr = sampleStr;
+            //console.log('btc last:',last);
+          } else {
+            ethStr = sampleStr
+            //console.log('eth last:',last);
+          }
+      }
+  });
+}
+
+cron.schedule('*/10 * * * *', function() {
+    Req('btc_krw');
+    Req('eth_krw');
 },
 function(){console.log('job stop')},
 true);
  
 app.get('/', function (req, res) {
-  res.send('Hello World! </br>' + sampleStr);
+  res.send('Hello World! </br>' + '[btc]' + btcStr + '</br></br>' + '[eth]' + ethStr);
 });
  
 var server = app.listen(3000, function () {
