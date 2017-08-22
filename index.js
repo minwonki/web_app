@@ -5,32 +5,30 @@ var request = require('request');
 
 var btcStr = 'btc_nothing';
 var ethStr = 'eth_nothing';
-var startValue = 4750000;
-var range = 272500;
 
 function Req (type) {
   this.url = 'https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=' + type;
-  this.startValue = 4750000;
-  this.range = 272500;
-  this.sampleStr = 'nothing';
-  
+  var startVal = 4221000;
+  var rangeVal = 666000;
+ 
   request(this.url,
   function(error, response, body) {
       var jsonObj = JSON.parse(body);
       var timestamp = new Date(jsonObj['timestamp']);
       if (timestamp.getHours() == 1) {
-          startValue = jsonObj['last'];
-          range = jsonObj['high'] - jsonObj['low'];
+          startVal = jsonObj['last'];
+          rangeVal = jsonObj['high'] - jsonObj['low'];
       } else {
-          var buy = Number(startValue) + range*0.5;
+          var buy = Number(startVal) + rangeVal*0.5;
           var last = jsonObj['last']
           sampleStr = timestamp.toString();
-          sampleStr = sampleStr + '</br>start:' + startValue + ', range:' + range + ", last:" + last; 
+          sampleStr = sampleStr + '</br>start:' + startVal + ', range:' + rangeVal + ", last:" + last; 
           if (buy < last) {
              sampleStr = sampleStr + '</br>Buy Now!!! - buy:' + buy; 
           } else {
              sampleStr = sampleStr + '</br>Not yet!!! - buy:' + buy;
           }
+          console.log('type:', type);
           if (type == 'btc_krw') {
             btcStr = sampleStr;
             //console.log('btc last:',last);
