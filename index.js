@@ -5,30 +5,44 @@ var request = require('request');
 
 var btcStr = 'btc_nothing';
 var ethStr = 'eth_nothing';
+var btc_startVal = 100;
+var btc_rangeVal = 10;
+var eth_startVal = 101;
+var eth_rangeVal = 11;
 
 function Req (type) {
   this.url = 'https://api.korbit.co.kr/v1/ticker/detailed?currency_pair=' + type;
-  var startVal = 4221000;
-  var rangeVal = 666000;
  
   request(this.url,
   function(error, response, body) {
       var jsonObj = JSON.parse(body);
       var timestamp = new Date(jsonObj['timestamp']);
       if (timestamp.getHours() == 1) {
-          startVal = jsonObj['last'];
-          rangeVal = jsonObj['high'] - jsonObj['low'];
+          if (type == 'btc_krw') {
+              btc_startVal = jsonObj['last'];
+              btc_rangeVal = jsonObj['high'] - jsonObj['low'];
+          } else {
+              eth_startVal = jsonObj['last'];
+              eth_rangeVal = jsonObj['high'] - jsonObj['low'];
+          }
       } else {
-          var buy = Number(startVal) + rangeVal*0.5;
+          var buy = 0;
           var last = jsonObj['last']
           sampleStr = timestamp.toString();
-          sampleStr = sampleStr + '</br>start:' + startVal + ', range:' + rangeVal + ", last:" + last; 
+          if (type == 'btc_krw') {
+              buy = Number(btc_startVal) + btc_rangeVal*0.5;
+              sampleStr = sampleStr + '</br>start:' + btc_startVal + ', range:' + btc_rangeVal + ", last:" + last; 
+          } else {
+              buy = Number(eth_startVal) + eth_rangeVal*0.5;
+              sampleStr = sampleStr + '</br>start:' + eth_startVal + ', range:' + eth_rangeVal + ", last:" + last; 
+          }
+
           if (buy < last) {
              sampleStr = sampleStr + '</br>Buy Now!!! - buy:' + buy; 
           } else {
              sampleStr = sampleStr + '</br>Not yet!!! - buy:' + buy;
           }
-          console.log('type:', type);
+
           if (type == 'btc_krw') {
             btcStr = sampleStr;
             //console.log('btc last:',last);
